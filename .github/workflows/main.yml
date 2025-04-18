@@ -1,0 +1,32 @@
+name: Sync files to another repo
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync-files:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source repo
+        uses: actions/checkout@v3
+
+      - name: Set up Git
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+      - name: Clone destination repo
+        run: |
+          git clone https://x-access-token:${{ secrets.TARGET_REPO_TOKEN }}@github.com/hoyosK/destino.git destination-repo
+      - name: Copy files to destination repo
+        run: |
+          mkdir -p destination-repo/workflow
+          cp -r workflow/* destination-repo/workflow/
+      - name: Commit and push changes
+        run: |
+          cd destination-repo
+          git add .
+          git commit -m "Sync from source repo" || echo "Nothing to commit"
+          git push
